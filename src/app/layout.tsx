@@ -1,26 +1,29 @@
+import { SessionProvider } from "next-auth/react";
 import "./globals.css";
-import { Inter, Almarai } from "next/font/google";
+import { Inter } from "next/font/google";
+import { auth } from "@/auth";
+import Providers from "@/components/providers";
 
 const inter = Inter({ subsets: ["latin"] });
-const almarai = Almarai({
-  subsets: ["latin", "arabic"], weight: [
-    "300",
-    "400",
-    "700",
-    "800"
-  ]
-});
 
-export default function RootLayout({
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
-    <html lang="en">
-      <body className={`${inter.className} ${almarai.className}`}>
-        {children}
-      </body>
-    </html>
+    <SessionProvider session={session}>
+      <html lang="en">
+        <body className={`${inter.className}`}>
+          <Providers>
+            {children}
+          </Providers>
+        </body>
+      </html>
+    </SessionProvider>
+
   );
 }
