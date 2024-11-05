@@ -1,3 +1,4 @@
+import { Footer } from '@/components/shared/footer/footer'
 import { Navbar } from '@/components/shared/navbar/navbar'
 import React from 'react'
 
@@ -9,7 +10,8 @@ const layout = ({ children }: Props) => {
     return (
         <main>
             <Navbar />
-            <div></div>
+            <div>{children}</div>
+            <Footer />
         </main>
     )
 }
