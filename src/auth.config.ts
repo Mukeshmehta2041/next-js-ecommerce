@@ -1,15 +1,8 @@
-import { z } from "zod";
-import bcrypt from "bcryptjs";
+import { fetchCustomer, loginCustomer } from "@/lib/shopify";
 import type { NextAuthConfig } from "next-auth";
-import { eq } from "drizzle-orm";
 import { JWT } from "next-auth/jwt";
-import GitHub from "next-auth/providers/github";
-import Google from "next-auth/providers/google";
-import Credentials from "next-auth/providers/credentials";
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-
-import { db } from "@/db/drizzle";
-import { users } from "@/db/schema";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { z } from "zod";
 
 const CredentialsSchema = z.object({
     email: z.string().email(),
@@ -19,79 +12,100 @@ const CredentialsSchema = z.object({
 declare module "next-auth/jwt" {
     interface JWT {
         id: string | undefined;
+        accessToken?: string;
+        firstName?: string;
+        lastName?: string;
     }
 }
 
-declare module "@auth/core/jwt" {
-    interface JWT {
-        id: string | undefined;
+declare module "next-auth" {
+    interface User {
+        firstName?: string;
+        lastName?: string;
+        accessToken?: string;
+    }
+
+    interface Session {
+        user: {
+            id?: string;
+            email?: string | null;
+            firstName?: string;
+            lastName?: string;
+            accessToken?: string;
+        };
     }
 }
 
 export default {
-    adapter: DrizzleAdapter(db),
     providers: [
-        Credentials({
+        CredentialsProvider({
+            name: "Shopify",
             credentials: {
                 email: { label: "Email", type: "email" },
-                pasword: { label: "Password", type: "password" },
+                password: { label: "Password", type: "password" },
             },
             async authorize(credentials) {
                 const validatedFields = CredentialsSchema.safeParse(credentials);
 
                 if (!validatedFields.success) {
-                    return null;
+                    throw new Error("Invalid credentials format");
                 }
 
                 const { email, password } = validatedFields.data;
 
-                const query = await db
-                    .select()
-                    .from(users)
-                    .where(eq(users.email, email));
+                const loginResponse = await loginCustomer(email, password);
 
-                const user = query[0];
+                if (loginResponse?.data?.customerAccessTokenCreate?.userErrors.length) {
+                    throw new Error(loginResponse.data.customerAccessTokenCreate.userErrors[0].message);
+                }
 
-                if (!user || !user.password) {
+                const accessToken = loginResponse.data.customerAccessTokenCreate.customerAccessToken.accessToken;
+
+                if (!accessToken) {
                     return null;
                 }
 
-                const passwordsMatch = await bcrypt.compare(
-                    password,
-                    user.password,
-                );
+                const customerData = await fetchCustomer(accessToken);
 
-                if (!passwordsMatch) {
+                if (!customerData) {
                     return null;
                 }
 
-                return user;
+                return {
+                    id: customerData.id,
+                    email: customerData.email,
+                    firstName: customerData.firstName,
+                    lastName: customerData.lastName,
+                    accessToken: accessToken,
+                };
             },
         }),
-        GitHub,
-        Google
     ],
     pages: {
         signIn: "/sign-in",
-        error: "/sign-in"
+        error: "/sign-in",
     },
     session: {
         strategy: "jwt",
     },
     callbacks: {
-        session({ session, token }) {
-            if (token.id) {
-                session.user.id = token.id;
-            }
-
-            return session;
-        },
-        jwt({ token, user }) {
+        async jwt({ token, user }) {
             if (user) {
                 token.id = user.id;
+                token.accessToken = user.accessToken;
+                token.firstName = user.firstName;
+                token.lastName = user.lastName;
             }
-
             return token;
-        }
+        },
+        async session({ session, token }) {
+            if (token.id) {
+                session.user.id = token.id;
+                // session.user.accessToken = token.accessToken;
+                session.user.firstName = token.firstName;
+                session.user.lastName = token.lastName;
+            }
+            return session;
+        },
     },
-} satisfies NextAuthConfig
+} satisfies NextAuthConfig;

@@ -10,42 +10,37 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { useSignup } from "@/hooks/use-sign-up"
+import { createCustomer } from "@/lib/shopify"
 import { TriangleAlert } from "lucide-react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { useState } from "react"
-import { FaGithub } from "react-icons/fa"
-import { FcGoogle } from "react-icons/fc"
 
 export const SignUpCard = () => {
-    const mutation = useSignup()
-    const [name, setName] = useState("")
+    const [firstName, setFirstName] = useState("")
+    const [lastName, setLastName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [error, setError] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
 
-    const onCredentialsSignUp = (e: React.FormEvent<HTMLFormElement>) => {
+    const onCredentialsSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
-        mutation.mutate({
-            name,
-            email,
-            password
-        }, {
-            onSuccess: () => {
+        try {
+            const customer = await createCustomer(firstName, lastName, email, password)
+            if (customer) {
                 signIn("credentials", {
                     email: email,
                     password: password,
                     callbackUrl: "/"
                 })
             }
-        })
-    }
-
-    const onProviderSignIn = (provider: "github" | "google") => {
-        signIn(provider, {
-            callbackUrl: "/"
-        })
+        } catch (error: any) {
+            console.error("Sign up error:", error)
+            setError(true)
+            setErrorMessage(error?.message || "An error occurred during sign up.")
+        }
     }
 
     return (
@@ -58,18 +53,25 @@ export const SignUpCard = () => {
                     Use your email or another service to continue
                 </CardDescription>
             </CardHeader>
-            {!!mutation.error && (
+            {error && (
                 <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6">
                     <TriangleAlert className="size-4" />
-                    <p>Something went wrong</p>
+                    <p>{errorMessage}</p>
                 </div>
             )}
             <CardContent className="space-y-5 px-0 pb-0">
                 <form action="" onSubmit={onCredentialsSignUp} className="space-y-2.5">
                     <Input
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="First Name"
+                        type="text"
+                        required
+                    />
+                    <Input
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Last Name"
                         type="text"
                         required
                     />
@@ -92,20 +94,7 @@ export const SignUpCard = () => {
                     <Button type="submit" className="w-full" size="lg">Continue</Button>
                 </form>
                 <Separator />
-                <div className="gap-y-2.5 flex flex-col">
-                    <Button variant="outline" size="lg" className="w-full relative"
-                        onClick={() => onProviderSignIn("github")}
-                    >
-                        <FaGithub className="mr-2 size-5 top-2.5 left-2.5 absolute" />
-                        Continue with Github
-                    </Button>
-                    <Button variant="outline" size="lg" className="w-full relative"
-                        onClick={() => onProviderSignIn("google")}
-                    >
-                        <FcGoogle className="mr-2 size-5 top-2.5 left-2.5 absolute" />
-                        Continue with Google
-                    </Button>
-                </div>
+
                 <p className="text-xs text-muted-foreground">
                     Already have an account? <Link href="/sign-in"><span className="text-sky-700 hover:underline">Sign in</span></Link>
                 </p>

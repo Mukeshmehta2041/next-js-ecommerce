@@ -4,6 +4,7 @@ import React from 'react'
 import { SearchBar } from './searchbar'
 import { NavIcons } from './nav-icons'
 import { getMenu } from '@/lib/shopify'
+import { UserButton } from '@/components/auth/user-button'
 
 export const Navbar = async () => {
     const menu = await getMenu("frontend-nav-menu");
@@ -31,6 +32,7 @@ export const Navbar = async () => {
                 <div className="w-2/3 xl:w-1/2 flex items-center justify-between gap-8">
                     <SearchBar />
                     <NavIcons />
+                    <UserButton />
                 </div>
             </div>
         </nav>

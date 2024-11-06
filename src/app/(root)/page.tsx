@@ -1,10 +1,14 @@
 // import { CategoryList } from '@/components/category/category-list'
+import { auth } from '@/auth'
 import { ProductList } from '@/components/product/product-list'
 import { getProducts } from '@/lib/shopify'
 // import { ProductList } from '@/components/products/product-list'
 import React from 'react'
 
 const HomePage = async () => {
+
+  const session = await auth()
+
   const products = await getProducts({})
 
   return (

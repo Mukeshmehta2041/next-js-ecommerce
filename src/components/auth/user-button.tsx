@@ -18,8 +18,8 @@ export const UserButton = () => {
     }
 
 
-    const name = session.data?.user?.name!;
-    const imageUrl = session.data?.user?.image;
+    const name = session.data?.user?.firstName + session.data?.user?.lastName!;
+    const imageUrl = "";
 
     return (
         <DropdownMenu modal={false}>

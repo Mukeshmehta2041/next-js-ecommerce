@@ -1,6 +1,7 @@
 import { HIDDEN_PRODUCT_TAG, SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../constants";
 import { isShopifyError } from "../type-guards";
 import { ensureStartWith } from "../utils";
+import { createCustomerMutation } from "./mutations/customer";
 import { getCollectionsQuery } from "./queries/collection";
 import { getMenuQuery } from "./queries/menu";
 import { getPageQuery, getPagesQuery } from "./queries/page";
@@ -261,3 +262,140 @@ export async function getProducts({
 
     return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
 }
+
+
+
+export async function createCustomer(firstName: string, lastName: string, email: string, password: string, acceptsMarketing: boolean = true) {
+    const url = endpoint
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': key,
+    };
+
+    const query = `
+    mutation {
+      customerCreate(input: {
+        firstName: "${firstName}",
+        lastName: "${lastName}",
+        email: "${email}",
+        password: "${password}",
+        acceptsMarketing: ${acceptsMarketing}
+      }) {
+        customer {
+          id
+          firstName
+          lastName
+          email
+          phone
+          tags
+          createdAt
+          updatedAt
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ query }),
+        });
+
+        const data = await response.json();
+        if (data.errors) {
+            console.error('Error creating customer:', data.errors);
+            throw new Error(data.errors[0].message);
+        }
+        return data.data.customerCreate.customer;
+    } catch (error) {
+        console.error('Error creating customer:', error);
+        throw error;
+    }
+}
+
+
+export async function loginCustomer(email: string, password: string) {
+    const url = endpoint
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': key,
+    };
+
+    const query = `
+    mutation {
+      customerAccessTokenCreate(input: {
+        email: "${email}",
+        password: "${password}"
+      }) {
+        customerAccessToken {
+          accessToken
+          expiresAt
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ query }),
+        });
+
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error logging in customer:', error);
+        throw error;
+    }
+}
+
+export async function fetchCustomer(accessToken: string) {
+    const url = endpoint;
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': key,
+    };
+
+    const query = `
+    query {
+      customer(customerAccessToken: "${accessToken}") {
+        id
+        email
+        firstName
+        lastName
+        phone
+      }
+    }
+  `;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ query }),
+        });
+
+
+
+        const data = await response.json();
+        if (data.errors) {
+            console.error('Error fetching customer data:', data.errors);
+            throw new Error(data.errors[0].message);
+        }
+        return data.data.customer;
+    } catch (error) {
+        console.error('Error fetching customer data:', error);
+        throw error;
+    }
+}
+
