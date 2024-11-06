@@ -10,3 +10,4 @@ export function ensureStartWith(stringToCheck: string, startsWith: string) {
     ? stringToCheck
     : `${startsWith}${stringToCheck}`;
 }
+

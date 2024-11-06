@@ -1,7 +1,28 @@
+"use client"
+
+import { auth } from '@/auth';
+import { Session } from 'next-auth';
 import Image from 'next/image'
+import { useRouter } from 'next/navigation';
 import React from 'react'
 
-export const NavIcons = () => {
+
+type Props = {
+    session: Session | null
+}
+
+export const NavIcons = ({ session }: Props) => {
+
+    const router = useRouter()
+
+    const handleClick = () => {
+        if (session) {
+            return router.push("/account")
+        } else {
+            router.push("/sign-in")
+        }
+    }
+
     const counter = 0;
     return (
         <div className="flex items-center gap-4 xl:gap-6 relative">
@@ -11,13 +32,7 @@ export const NavIcons = () => {
                 width={22}
                 height={22}
                 className="cursor-pointer"
-            />
-            <Image
-                src="/icons/notification.png"
-                alt=""
-                width={22}
-                height={22}
-                className="cursor-pointer"
+                onClick={handleClick}
             />
             <div
                 className="relative cursor-pointer"

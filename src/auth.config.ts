@@ -2,6 +2,7 @@ import { fetchCustomer, loginCustomer } from "@/lib/shopify";
 import type { NextAuthConfig } from "next-auth";
 import { JWT } from "next-auth/jwt";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { log } from "util";
 import { z } from "zod";
 
 const CredentialsSchema = z.object({
@@ -65,11 +66,13 @@ export default {
                     return null;
                 }
 
+
                 const customerData = await fetchCustomer(accessToken);
 
                 if (!customerData) {
                     return null;
                 }
+
 
                 return {
                     id: customerData.id,
@@ -101,7 +104,7 @@ export default {
         async session({ session, token }) {
             if (token.id) {
                 session.user.id = token.id;
-                // session.user.accessToken = token.accessToken;
+                session.user.accessToken = token.accessToken;
                 session.user.firstName = token.firstName;
                 session.user.lastName = token.lastName;
             }

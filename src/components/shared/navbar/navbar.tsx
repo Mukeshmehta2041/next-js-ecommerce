@@ -4,10 +4,11 @@ import React from 'react'
 import { SearchBar } from './searchbar'
 import { NavIcons } from './nav-icons'
 import { getMenu } from '@/lib/shopify'
-import { UserButton } from '@/components/auth/user-button'
+import { auth } from '@/auth'
 
 export const Navbar = async () => {
     const menu = await getMenu("frontend-nav-menu");
+    const session = await auth()
 
 
     return (
@@ -31,8 +32,9 @@ export const Navbar = async () => {
                 </div>
                 <div className="w-2/3 xl:w-1/2 flex items-center justify-between gap-8">
                     <SearchBar />
-                    <NavIcons />
-                    <UserButton />
+                    <NavIcons
+                        session={session}
+                    />
                 </div>
             </div>
         </nav>

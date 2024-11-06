@@ -1,3 +1,4 @@
+import { useToken } from "@/hooks/use-token";
 import { HIDDEN_PRODUCT_TAG, SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../constants";
 import { isShopifyError } from "../type-guards";
 import { ensureStartWith } from "../utils";
@@ -263,8 +264,6 @@ export async function getProducts({
     return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
 }
 
-
-
 export async function createCustomer(firstName: string, lastName: string, email: string, password: string, acceptsMarketing: boolean = true) {
     const url = endpoint
     const headers = {
@@ -351,6 +350,7 @@ export async function loginCustomer(email: string, password: string) {
             body: JSON.stringify({ query }),
         });
 
+
         const data = await response.json();
         return data;
     } catch (error) {
@@ -385,8 +385,6 @@ export async function fetchCustomer(accessToken: string) {
             body: JSON.stringify({ query }),
         });
 
-
-
         const data = await response.json();
         if (data.errors) {
             console.error('Error fetching customer data:', data.errors);
@@ -399,3 +397,113 @@ export async function fetchCustomer(accessToken: string) {
     }
 }
 
+
+export async function getCustomerWithBillingAddress(accessToken: string) {
+    const url = endpoint;
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': key,
+    };
+
+
+    const query = `
+    query {
+      customer(customerAccessToken: "${accessToken}") {
+        id
+        email
+        firstName
+        lastName
+        phone
+        addresses(first: 5) {
+          edges {
+            node {
+              id
+              address1
+              address2
+              city
+              province
+              country
+              zip
+              phone
+              # Customize this based on your billing address criteria
+              name
+            }
+          }
+        }
+      }
+    }
+`;
+
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ query }),
+        });
+
+        const data = await response.json();
+        if (data.errors) {
+            console.error('Error fetching customer data:', data.errors);
+            throw new Error(data.errors[0].message);
+        }
+
+        return data
+    } catch (error) {
+        console.error('Error fetching customer with billing address:', error);
+        throw error;
+    }
+}
+
+
+export async function fetchAllAddresses() {
+    const accessToken = await useToken()
+    const url = endpoint;
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': key,
+    };
+
+    const query = `
+    query {
+      customer(customerAccessToken: "${accessToken}") {
+        addresses(first: 5) {
+          edges {
+            node {
+              id
+              address1
+              address2
+              city
+              province
+              country
+              zip
+              phone
+              name
+            }
+          }
+        }
+      }
+    }
+  `;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ query }),
+        });
+
+        const data = await response.json();
+        if (data.errors) {
+            console.error('Error fetching customer addresses:', data.errors);
+            throw new Error(data.errors[0].message);
+        }
+
+
+
+        return data.data.customer.addresses.edges.map((edge: any) => edge.node);
+    } catch (error) {
+        console.error('Error fetching customer with billing address:', error);
+        throw error;
+    }
+}
