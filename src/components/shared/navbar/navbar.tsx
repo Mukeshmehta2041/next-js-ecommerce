@@ -8,8 +8,6 @@ import { getMenu } from '@/lib/shopify'
 export const Navbar = async () => {
     const menu = await getMenu("frontend-nav-menu");
 
-    console.log("menu", menu);
-
 
     return (
         <nav className="h-20 px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64 relative">

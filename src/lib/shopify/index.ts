@@ -4,8 +4,8 @@ import { ensureStartWith } from "../utils";
 import { getCollectionsQuery } from "./queries/collection";
 import { getMenuQuery } from "./queries/menu";
 import { getPageQuery, getPagesQuery } from "./queries/page";
-import { getProductQuery } from "./queries/product";
-import { Collection, Connection, Image, Menu, Page, Product, ShopifyCollection, ShopifyCollectionsOperation, ShopifyMenuOperation, ShopifyPageOperation, ShopifyPagesOperation, ShopifyProduct, ShopifyProductOperation } from "./types";
+import { getProductQuery, getProductsQuery } from "./queries/product";
+import { Collection, Connection, Image, Menu, Page, Product, ShopifyCollection, ShopifyCollectionsOperation, ShopifyMenuOperation, ShopifyPageOperation, ShopifyPagesOperation, ShopifyProduct, ShopifyProductOperation, ShopifyProductsOperation } from "./types";
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
     ? ensureStartWith(process.env.SHOPIFY_STORE_DOMAIN, "https://")
@@ -85,6 +85,22 @@ function reshapeProduct(
     };
 }
 
+function reshapeProducts(products: ShopifyProduct[]) {
+    const reshapedProducts = [];
+
+    for (const product of products) {
+        if (product) {
+            const reshapedProduct = reshapeProduct(product);
+
+            if (reshapedProduct) {
+                reshapedProducts.push(reshapedProduct);
+            }
+        }
+    }
+
+    return reshapedProducts;
+}
+
 export async function shopifyFetch<T>({
     cache = "force-cache",
     headers,
@@ -149,8 +165,6 @@ export const getMenu = async (handle: string): Promise<Menu[]> => {
             handle,
         },
     });
-
-    console.log("res", JSON.stringify(res));
 
 
     return (
@@ -222,4 +236,28 @@ export async function getPages(): Promise<Page[]> {
     });
 
     return removeEdgesAndNodes(res.body.data.pages);
+}
+
+
+export async function getProducts({
+    query,
+    reverse,
+    sortKey,
+}: {
+    query?: string;
+    reverse?: boolean;
+    sortKey?: string;
+}): Promise<Product[]> {
+    const res = await shopifyFetch<ShopifyProductsOperation>({
+        query: getProductsQuery,
+        tags: [TAGS.products],
+        variables: {
+            query,
+            reverse,
+            sortKey,
+        },
+    });
+
+
+    return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
 }

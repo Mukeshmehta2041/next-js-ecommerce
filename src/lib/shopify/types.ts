@@ -134,3 +134,14 @@ export type ShopifyPagesOperation = {
         pages: Connection<Page>;
     };
 };
+
+export type ShopifyProductsOperation = {
+    data: {
+        products: Connection<ShopifyProduct>;
+    };
+    variables: {
+        query?: string;
+        reverse?: boolean;
+        sortKey?: string;
+    };
+};
