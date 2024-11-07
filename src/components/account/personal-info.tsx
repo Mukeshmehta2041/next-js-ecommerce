@@ -11,12 +11,12 @@ export const PersonalInfo = async () => {
 
     const customer = await fetchCustomer(session.user.accessToken!)
 
-    const isEditing = false;
 
     return (
         <>
             <PersonalInfoForm
                 initialCustomer={customer}
+                token={session.user.accessToken!}
             />
         </>
     )

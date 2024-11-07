@@ -9,6 +9,9 @@ export const collectionFragment = /* GraphQL */ `
       ...seo
     }
     updatedAt
+    image {
+      src
+    }
   }
   ${seoFragment}
 `;

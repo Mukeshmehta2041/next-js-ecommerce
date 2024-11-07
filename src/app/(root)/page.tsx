@@ -1,5 +1,6 @@
 // import { CategoryList } from '@/components/category/category-list'
 import { auth } from '@/auth'
+import { CollectionCarousel } from '@/components/collection/collection-list'
 import { ProductList } from '@/components/product/product-list'
 import { getProducts } from '@/lib/shopify'
 // import { ProductList } from '@/components/products/product-list'
@@ -13,6 +14,9 @@ const HomePage = async () => {
 
   return (
     <div className="">
+      <div className='mt-20'>
+        <CollectionCarousel />
+      </div>
       <div className="mt-24 px-4 md:px-8 lg:px-16 xl:px-32 2xl:px-64">
         <h1 className="text-2xl">Featured Products</h1>
         <ProductList

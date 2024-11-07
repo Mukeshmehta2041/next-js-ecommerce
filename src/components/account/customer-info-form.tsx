@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { fetchCustomer } from "@/lib/shopify"
+import { fetchCustomer, updateCustomer } from "@/lib/shopify"
 import { Loader2 } from 'lucide-react'
 
 type Props = {
@@ -17,9 +17,10 @@ type Props = {
         email: string
         phone?: string
     }
+    token: string
 }
 
-export const PersonalInfoForm = ({ initialCustomer }: Props) => {
+export const PersonalInfoForm = ({ initialCustomer, token }: Props) => {
     const [isEditing, setIsEditing] = useState(false)
     const [isSaving, setIsSaving] = useState(false)
     const [customer, setCustomer] = useState(initialCustomer)
@@ -31,21 +32,20 @@ export const PersonalInfoForm = ({ initialCustomer }: Props) => {
     }
 
     const handleSave = async () => {
-        // setIsSaving(true)
-        // setError('')
-        // try {
-        //     const session = await auth()
-        //     if (!session) {
-        //         throw new Error('Not authenticated')
-        //     }
-        //     await updateCustomer(session.user.accessToken, customer)
-        //     setIsEditing(false)
-        //     router.refresh()
-        // } catch (err) {
-        //     setError('Failed to update information. Please try again.')
-        // } finally {
-        //     setIsSaving(false)
-        // }
+        try {
+            const result = await updateCustomer({
+                email: customer.email,
+                firstName: customer.firstName,
+                lastName: customer.lastName,
+                phone: customer.phone || "",
+            }, token)
+
+            console.log("Customer saved", result);
+
+        } catch (error) {
+            console.log(error);
+
+        }
     }
 
     return (

@@ -6,7 +6,7 @@ import { ScrollArea } from "../ui/scroll-area"
 export const OrderHistory = () => {
     return (
         <>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center">
                 <CardTitle>Order History</CardTitle>
                 <Button variant="ghost" size="icon">
                     <HelpCircle className="h-4 w-4" />

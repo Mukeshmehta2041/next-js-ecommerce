@@ -1,3 +1,5 @@
+"use server"
+
 import { useToken } from "@/hooks/use-token";
 import { HIDDEN_PRODUCT_TAG, SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../constants";
 import { isShopifyError } from "../type-guards";
@@ -208,6 +210,7 @@ export const getCollections = async (): Promise<Collection[]> => {
         ),
     ]
 
+    // @ts-ignore
     return collections;
 }
 
@@ -414,6 +417,66 @@ export async function createCustomer(firstName: string, lastName: string, email:
 }
 
 
+export async function updateCustomer(customerData: { firstName: string, lastName: string, email: string, phone: string }, accessToken: string,) {
+    const url = endpoint;
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-Shopify-Storefront-Access-Token': key,
+    };
+
+    const query = `
+    mutation {
+        customerUpdate(
+            customerAccessToken: "${accessToken}", 
+            customer: {
+                firstName: "${customerData.firstName}",
+                lastName: "${customerData.lastName}",
+                email: "${customerData.email}",
+                phone: "${customerData.phone}"
+            }
+        ) {
+            customer {
+                id
+                firstName
+                lastName
+                email
+                phone
+            }
+            userErrors {
+                field
+                message
+            }
+        }
+    }`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({ query }),
+        });
+
+        const data = await response.json();
+
+        if (data.errors) {
+            console.error('Error updating customer data:', data.errors);
+            throw new Error(data.errors[0].message);
+        }
+
+        if (data.data.customerUpdate.userErrors.length > 0) {
+            console.error('GraphQL errors:', data.data.customerUpdate.userErrors);
+            throw new Error(data.data.customerUpdate.userErrors[0].message);
+        }
+
+        return data.data.customerUpdate.customer;
+    } catch (error) {
+        console.error('Error updating customer data:', error);
+        throw error;
+    }
+}
+
+
+
 export async function loginCustomer(email: string, password: string) {
     const url = endpoint
     const headers = {
@@ -492,6 +555,8 @@ export async function fetchCustomer(accessToken: string) {
         throw error;
     }
 }
+
+
 
 
 export async function getCustomerWithBillingAddress(accessToken: string) {
@@ -594,8 +659,6 @@ export async function fetchAllAddresses() {
             console.error('Error fetching customer addresses:', data.errors);
             throw new Error(data.errors[0].message);
         }
-
-
 
         return data.data.customer.addresses.edges.map((edge: any) => edge.node);
     } catch (error) {
