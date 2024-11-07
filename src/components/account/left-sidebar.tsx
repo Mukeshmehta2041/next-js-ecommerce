@@ -32,9 +32,6 @@ export const AccountLeftSidebar = () => {
     const { data: session } = useSession()
     const router = useRouter()
 
-    console.log("Session", session);
-
-
     const name = React.useMemo(() => `${session?.user?.firstName} ${session?.user?.lastName}`, [session]);
 
     const handleSignOut = async () => {

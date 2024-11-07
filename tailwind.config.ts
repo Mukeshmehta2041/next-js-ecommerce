@@ -13,6 +13,7 @@ const config: Config = {
 				store: "#F35C7A",
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
+
 				card: {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
@@ -50,7 +51,8 @@ const config: Config = {
 					'3': 'hsl(var(--chart-3))',
 					'4': 'hsl(var(--chart-4))',
 					'5': 'hsl(var(--chart-5))'
-				}
+				},
+				lightBackground: "#f6f1eb",
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

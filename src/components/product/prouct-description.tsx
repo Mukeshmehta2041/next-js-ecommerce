@@ -3,8 +3,10 @@ import React from 'react'
 import Price from '../shared/price'
 import { VariantSelector } from './variant-selector'
 import Prose from '../shared/prose'
+import { AddToCart } from '../cart/add-cart'
 
 export const ProductDescription = ({ product }: { product: Product }) => {
+
     return (
         <>
             <div className="mb-6 flex flex-col border-b pb-6 dark:border-neutral-700">
@@ -23,7 +25,7 @@ export const ProductDescription = ({ product }: { product: Product }) => {
                     html={product.descriptionHtml}
                 />
             ) : null}
-
+            <AddToCart product={product} />
         </>
     )
 }

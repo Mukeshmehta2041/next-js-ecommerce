@@ -7,7 +7,9 @@ import { getCollectionsQuery } from "./queries/collection";
 import { getMenuQuery } from "./queries/menu";
 import { getPageQuery, getPagesQuery } from "./queries/page";
 import { getProductQuery, getProductsQuery } from "./queries/product";
-import { Collection, Connection, Image, Menu, Page, Product, ShopifyCollection, ShopifyCollectionsOperation, ShopifyMenuOperation, ShopifyPageOperation, ShopifyPagesOperation, ShopifyProduct, ShopifyProductOperation, ShopifyProductsOperation } from "./types";
+import { Cart, Collection, Connection, Image, Menu, Page, Product, ShopifyAddToCartOperation, ShopifyCart, ShopifyCartOperation, ShopifyCollection, ShopifyCollectionsOperation, ShopifyCreateCartOperation, ShopifyMenuOperation, ShopifyPageOperation, ShopifyPagesOperation, ShopifyProduct, ShopifyProductOperation, ShopifyProductsOperation, ShopifyRemoveFromCartOperation, ShopifyUpdateCartOperation } from "./types";
+import { addToCartMutation, createCartMutation, editCartItemsMutation, removeFromCartMutation } from "./mutations/cart";
+import { getCartQuery } from "./queries/cart";
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
     ? ensureStartWith(process.env.SHOPIFY_STORE_DOMAIN, "https://")
@@ -218,6 +220,100 @@ export const getProduct = async (handle: string): Promise<Product | undefined> =
         },
     });
     return reshapeProduct(res.body.data.product, false);
+}
+
+
+function reshapeCart(cart: ShopifyCart): Cart {
+    if (!cart.cost?.totalTaxAmount) {
+        cart.cost.totalTaxAmount = {
+            amount: "0.0",
+            currencyCode: "USD",
+        };
+    }
+
+    return {
+        ...cart,
+        lines: removeEdgesAndNodes(cart.lines),
+    };
+}
+
+export async function addToCart(
+    cartId: string,
+    lines: { merchandiseId: string; quantity: number }[]
+): Promise<Cart> {
+    const res = await shopifyFetch<ShopifyAddToCartOperation>({
+        query: addToCartMutation,
+        variables: {
+            cartId,
+            lines,
+        },
+        cache: "no-cache",
+    });
+
+    return reshapeCart(res.body.data.cartLinesAdd.cart);
+}
+
+
+export async function getCart(
+    cartId: string | undefined
+): Promise<Cart | undefined> {
+    if (!cartId) return undefined;
+
+    const res = await shopifyFetch<ShopifyCartOperation>({
+        query: getCartQuery,
+        variables: { cartId },
+        tags: [TAGS.cart],
+    });
+
+    if (!res.body.data.cart) {
+        return undefined;
+    }
+
+
+
+    return reshapeCart(res.body.data.cart);
+}
+
+export async function createCart(): Promise<Cart> {
+    const res = await shopifyFetch<ShopifyCreateCartOperation>({
+        query: createCartMutation,
+        cache: "no-store",
+    });
+
+    return reshapeCart(res.body.data.cartCreate.cart);
+}
+
+
+export async function removeFromCart(
+    cartId: string,
+    lineIds: string[]
+): Promise<Cart> {
+    const res = await shopifyFetch<ShopifyRemoveFromCartOperation>({
+        query: removeFromCartMutation,
+        variables: {
+            cartId,
+            lineIds,
+        },
+        cache: "no-store",
+    });
+
+    return reshapeCart(res.body.data.cartLinesRemove.cart);
+}
+
+export async function updateCart(
+    cartId: string,
+    lines: { id: string; merchandiseId: string; quantity: number }[]
+): Promise<Cart> {
+    const res = await shopifyFetch<ShopifyUpdateCartOperation>({
+        query: editCartItemsMutation,
+        variables: {
+            cartId,
+            lines,
+        },
+        cache: "no-store",
+    });
+
+    return reshapeCart(res.body.data.cartLinesUpdate.cart);
 }
 
 

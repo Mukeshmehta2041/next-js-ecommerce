@@ -2,6 +2,7 @@ import { Gallery } from '@/components/product/gallery'
 import { ProductProvider } from '@/components/product/product-context'
 import { ProductDescription } from '@/components/product/prouct-description'
 import { getProduct } from '@/lib/shopify'
+import { Image } from '@/lib/shopify/types'
 import { notFound } from 'next/navigation'
 import React, { Suspense } from 'react'
 
@@ -29,6 +30,10 @@ const ProductPage = async ({ params: { handle }
                             }
                         >
                             <Gallery
+                                images={product.images.slice(0, 5).map((image: Image) => ({
+                                    src: image.url,
+                                    altText: image.altText,
+                                }))}
                             />
                         </Suspense>
                     </div>

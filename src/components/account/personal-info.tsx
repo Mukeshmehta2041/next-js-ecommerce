@@ -11,9 +11,6 @@ export const PersonalInfo = async () => {
 
     const customer = await fetchCustomer(session.user.accessToken!)
 
-    console.log("customer", customer);
-
-
     const isEditing = false;
 
     return (

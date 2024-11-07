@@ -1,6 +1,7 @@
 "use client"
 
 import { auth } from '@/auth';
+import { CartModal } from '@/components/cart/modal';
 import { Session } from 'next-auth';
 import Image from 'next/image'
 import { useRouter } from 'next/navigation';
@@ -34,13 +35,14 @@ export const NavIcons = ({ session }: Props) => {
                 className="cursor-pointer"
                 onClick={handleClick}
             />
-            <div
+            {/* <div
                 className="relative cursor-pointer"
             >
                 <Image src="/icons/cart.png" alt="" width={22} height={22} />
                 <div className="absolute -top-4 -right-4 w-6 h-6 bg-store rounded-full text-white text-sm flex items-center justify-center">
                     {counter}
                 </div>
-            </div>
+            </div> */}
+            <CartModal />
         </div>)
 }
