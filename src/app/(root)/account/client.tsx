@@ -13,12 +13,9 @@ type Props = {
 export const AccountClient = ({ children }: Props) => {
     const { activeTab, setActiveTab } = useActiveTab()
 
-    const handleSignOut = () => {
-    }
-
     return (
-        <Card className="flex-grow" >
-            <CardContent className="p-6">
+        <Card className="bg-white rounded-2xl shadow-md overflow-hidden">
+            <CardContent className="p-0">
                 <Tabs value={activeTab} className="w-full">
                     <AnimatePresence mode="wait">
                         <motion.div
@@ -26,28 +23,14 @@ export const AccountClient = ({ children }: Props) => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
-                            transition={{ duration: 0.2 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="p-6"
                         >
-                            {/* <TabsContent value="order-history">
-                                <OrderHistory />
-                            </TabsContent>
-                            <TabsContent value="personal-info">
-                                <PersonalInfo />
-                            </TabsContent>
-                            <TabsContent value="address">
-                                <Address />
-                            </TabsContent>
-                            <TabsContent value="payments">
-                                <Payments />
-                            </TabsContent> */}
                             {children}
                         </motion.div>
                     </AnimatePresence>
                 </Tabs>
             </CardContent>
-        </Card >
+        </Card>
     )
 }
-
-
-

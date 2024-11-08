@@ -12,7 +12,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
                     {children}
                 </div>
             </div>
-            <div className="fixed inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.8),rgba(0,0,0,.4),rgba(0,0,0,.8))] z-[1]" />
+            {/* <div className="fixed inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.8),rgba(0,0,0,.4),rgba(0,0,0,.8))] z-[1]" /> */}
         </div>
     )
 }

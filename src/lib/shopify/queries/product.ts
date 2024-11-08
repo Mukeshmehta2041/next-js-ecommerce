@@ -26,3 +26,37 @@ export const getProductsQuery = /* GraphQL */ `
   }
   ${productFragment}
 `;
+
+
+export const getProductsByCollectionQuery = `
+    query getProductsByCollection($collectionHandle: String!) {
+        collection(handle: $collectionHandle) {
+            products(first: 10) {
+                edges {
+                    node {
+                        id
+                        title
+                        descriptionHtml
+                        handle
+                        variants(first: 1) {
+                            edges {
+                                node {
+                                    priceV2 {
+                                        amount
+                                    }
+                                }
+                            }
+                        }
+                        images(first: 1) {
+                            edges {
+                                node {
+                                    src
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+`;

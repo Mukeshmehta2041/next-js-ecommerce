@@ -3,6 +3,12 @@ export type Menu = {
     path: string;
 };
 
+export interface NestedMenu {
+    title: string;
+    path: string;
+    items?: NestedMenu[];
+}
+
 
 export type Edge<T> = {
     node: T;
@@ -243,5 +249,19 @@ export type ShopifyUpdateCartOperation = {
             merchandiseId: string;
             quantity: number;
         }[];
+    };
+};
+
+
+export type ShopifyCollectionProductsOperation = {
+    data: {
+        collection: {
+            products: Connection<ShopifyProduct>;
+        };
+    };
+    variables: {
+        handle: string;
+        reverse?: boolean;
+        sortKey?: string;
     };
 };

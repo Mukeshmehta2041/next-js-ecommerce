@@ -1,33 +1,32 @@
-"use client"
+'use client'
 
-import { ProductOption, ProductVariant } from '@/lib/shopify/types';
+import { ProductOption, ProductVariant } from '@/lib/shopify/types'
 import React from 'react'
-import { useProduct, useUpdateURL } from './product-context';
-import clsx from 'clsx';
+import { useProduct, useUpdateURL } from './product-context'
+import clsx from 'clsx'
+import { motion } from 'framer-motion'
 
 type Combination = {
-    id: string;
-    availableForSale: boolean;
-    [key: string]: string | boolean;
-};
+    id: string
+    availableForSale: boolean
+    [key: string]: string | boolean
+}
 
 export const VariantSelector = ({
     options,
     variants,
 }: {
-    options: ProductOption[];
-    variants: ProductVariant[];
+    options: ProductOption[]
+    variants: ProductVariant[]
 }) => {
-    const { state, updateOption } = useProduct();
-    const updateURL = useUpdateURL();
+    const { state, updateOption } = useProduct()
+    const updateURL = useUpdateURL()
 
     const hasNoOptionsOrJustOneOption =
-        !options.length ||
-        (options.length === 1 && options[0]?.values.length === 1);
-
+        !options.length || (options.length === 1 && options[0]?.values.length === 1)
 
     if (hasNoOptionsOrJustOneOption) {
-        return null;
+        return null
     }
 
     const combinations: Combination[] = variants.map((variant) => ({
@@ -40,67 +39,63 @@ export const VariantSelector = ({
             }),
             {}
         ),
-    }));
-
+    }))
 
     return options.map((option) => (
-        <form key={option.id}>
+        <motion.form
+            key={option.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+        >
             <dl className="mb-8">
-                <dt className="mb-4 text-sm uppercase tracking-wide">{option.name}</dt>
+                <dt className="mb-4 text-sm uppercase tracking-wide text-[#3d3d3d]">{option.name}</dt>
                 <dd className="flex flex-wrap gap-3">
                     {option.values.map((value) => {
-                        const optionNameLowerCase = option.name.toLowerCase();
-
-                        // Base option params on current selectedOptions so we can preserve any other param state
-                        const optionParams = { ...state, [optionNameLowerCase]: value };
-
-                        // Filter out invalid options and check if the options combination is available for sale
+                        const optionNameLowerCase = option.name.toLowerCase()
+                        const optionParams = { ...state, [optionNameLowerCase]: value }
                         const filtered = Object.entries(optionParams).filter(
                             ([key, value]) =>
                                 options.find(
-                                    (option) =>
-                                        option.name.toLowerCase() === key &&
-                                        option.values.includes(value)
+                                    (option) => option.name.toLowerCase() === key && option.values.includes(value)
                                 )
-                        );
-
+                        )
                         const isAvailableForSale = combinations.find((combination) =>
                             filtered.every(
-                                ([key, value]) =>
-                                    combination[key] === value && combination.availableForSale
+                                ([key, value]) => combination[key] === value && combination.availableForSale
                             )
-                        );
-
-                        // The option is active if it's in the selected options
-                        const isActive = state[optionNameLowerCase] === value;
+                        )
+                        const isActive = state[optionNameLowerCase] === value
 
                         return (
-                            <button
+                            <motion.button
                                 formAction={() => {
-                                    const newState = updateOption(optionNameLowerCase, value);
-                                    updateURL(newState);
+                                    const newState = updateOption(optionNameLowerCase, value)
+                                    updateURL(newState)
                                 }}
                                 key={value}
                                 aria-disabled={!isAvailableForSale}
                                 disabled={!isAvailableForSale}
-                                title={`${option.name} ${value}${!isAvailableForSale ? " (Out of Stock)" : ""}`}
+                                title={`${option.name} ${value}${!isAvailableForSale ? ' (Out of Stock)' : ''}`}
                                 className={clsx(
-                                    "flex min-w-[48px] items-center justify-center rounded-full border bg-neutral-100 px-2 py-1 text-sm dark:border-neutral-800 dark:bg-neutral-900",
+                                    'flex min-w-[48px] items-center justify-center rounded-full border px-2 py-1 text-sm',
                                     {
-                                        "cursor-default ring-2 ring-blue-600": isActive,
-                                        "ring-1 ring-transparent transition duration-300 ease-in-out hover:ring-blue-600":
+                                        'cursor-default ring-2 ring-[#8b7b6b] bg-[#8b7b6b] text-white': isActive,
+                                        'ring-1 ring-transparent transition duration-300 ease-in-out hover:ring-[#8b7b6b] bg-[#f6f1eb] text-[#3d3d3d]':
                                             !isActive && isAvailableForSale,
-                                        "relative z-10 cursor-not-allowed overflow-hidden bg-neutral-100 text-neutral-500 ring-1 ring-neutral-300 before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-neutral-300 before:transition-transform dark:bg-neutral-900 dark:text-neutral-400 dark:ring-neutral-700 before:dark:bg-neutral-700":
+                                        'relative z-10 cursor-not-allowed overflow-hidden bg-[#e6d9c7] text-[#8b7b6b] ring-1 ring-[#d4c3a3] before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-[#d4c3a3] before:transition-transform':
                                             !isAvailableForSale,
                                     }
                                 )}
+                                whileHover={{ scale: isAvailableForSale ? 1.05 : 1 }}
+                                whileTap={{ scale: isAvailableForSale ? 0.95 : 1 }}
                             >
                                 {value}
-                            </button>
-                        );
+                            </motion.button>
+                        )
                     })}
                 </dd>
             </dl>
-        </form>
-    ));
+        </motion.form>
+    ))
 }

@@ -18,7 +18,7 @@ export const CollectionCarousel = async () => {
             >
                 <CarouselContent className="-ml-2 md:-ml-4">
                     {collections?.map((collection) => (
-                        <CarouselItem key={collection.handle} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/6">
+                        <CarouselItem key={collection.handle} className="pl-2 md:pl-4 sm:basis-1/2 md:basis-1/3 lg:basis-1/6 ">
                             <Link href={`/collections/${collection.handle}`}>
                                 <Card className="overflow-hidden bg-transparent border-none shadow-none">
                                     <CardContent className="p-4 flex flex-col items-center">

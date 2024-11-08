@@ -19,6 +19,10 @@ body {
   scrollbar-width: none;
 }
 
+.basis-1-7 {
+  flex-basis: calc(100% / 7);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

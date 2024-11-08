@@ -5,11 +5,11 @@ import { HIDDEN_PRODUCT_TAG, SHOPIFY_GRAPHQL_API_ENDPOINT, TAGS } from "../const
 import { isShopifyError } from "../type-guards";
 import { ensureStartWith } from "../utils";
 import { createCustomerMutation } from "./mutations/customer";
-import { getCollectionsQuery } from "./queries/collection";
-import { getMenuQuery } from "./queries/menu";
+import { getCollectionProductsQuery, getCollectionsQuery } from "./queries/collection";
+import { getMenuQuery, getNestedMenuQuery } from "./queries/menu";
 import { getPageQuery, getPagesQuery } from "./queries/page";
 import { getProductQuery, getProductsQuery } from "./queries/product";
-import { Cart, Collection, Connection, Image, Menu, Page, Product, ShopifyAddToCartOperation, ShopifyCart, ShopifyCartOperation, ShopifyCollection, ShopifyCollectionsOperation, ShopifyCreateCartOperation, ShopifyMenuOperation, ShopifyPageOperation, ShopifyPagesOperation, ShopifyProduct, ShopifyProductOperation, ShopifyProductsOperation, ShopifyRemoveFromCartOperation, ShopifyUpdateCartOperation } from "./types";
+import { Cart, Collection, Connection, Image, Menu, NestedMenu, Page, Product, ShopifyAddToCartOperation, ShopifyCart, ShopifyCartOperation, ShopifyCollection, ShopifyCollectionProductsOperation, ShopifyCollectionsOperation, ShopifyCreateCartOperation, ShopifyMenuOperation, ShopifyPageOperation, ShopifyPagesOperation, ShopifyProduct, ShopifyProductOperation, ShopifyProductsOperation, ShopifyRemoveFromCartOperation, ShopifyUpdateCartOperation } from "./types";
 import { addToCartMutation, createCartMutation, editCartItemsMutation, removeFromCartMutation } from "./mutations/cart";
 import { getCartQuery } from "./queries/cart";
 
@@ -172,7 +172,6 @@ export const getMenu = async (handle: string): Promise<Menu[]> => {
         },
     });
 
-
     return (
         res.body?.data?.menu?.items.map((item: { title: string; url: string }) => ({
             title: item.title,
@@ -184,10 +183,40 @@ export const getMenu = async (handle: string): Promise<Menu[]> => {
     );
 }
 
+export const getNestedMenu = async (handle: string): Promise<NestedMenu[]> => {
+    const res = await shopifyFetch<ShopifyMenuOperation>({
+        query: getNestedMenuQuery,
+        tags: [TAGS.collections],
+        variables: { handle },
+        cache: "no-cache"
+    });
+
+    return (
+        res.body?.data?.menu?.items.map((item: { title: string; url: string; items?: any[] }) => ({
+            title: item.title,
+            path: item.url
+                .replace(domain, "")
+                .replace("/collections", "/search")
+                .replace("/pages", ""),
+            items: item.items
+                ? item.items.map((subItem: { title: string; url: string }) => ({
+                    title: subItem.title,
+                    path: subItem.url
+                        .replace(domain, "")
+                        .replace("/collections", "/search")
+                        .replace("/pages", ""),
+                }))
+                : [],
+        })) || []
+    );
+};
+
+
 export const getCollections = async (): Promise<Collection[]> => {
     const res = await shopifyFetch<ShopifyCollectionsOperation>({
         query: getCollectionsQuery,
         tags: [TAGS.collections],
+        cache: "no-cache"
     });
 
     const shopifyCollections = removeEdgesAndNodes(res?.body?.data?.collections);
@@ -217,6 +246,7 @@ export const getCollections = async (): Promise<Collection[]> => {
 export const getProduct = async (handle: string): Promise<Product | undefined> => {
     const res = await shopifyFetch<ShopifyProductOperation>({
         query: getProductQuery,
+        cache: "force-cache",
         tags: [TAGS.products],
         variables: {
             handle,
@@ -224,6 +254,37 @@ export const getProduct = async (handle: string): Promise<Product | undefined> =
     });
     return reshapeProduct(res.body.data.product, false);
 }
+
+export async function getCollectionProducts({
+    collection,
+    reverse,
+    sortKey,
+}: {
+    collection: string;
+    reverse?: boolean;
+    sortKey?: string;
+}): Promise<Product[]> {
+    const res = await shopifyFetch<ShopifyCollectionProductsOperation>({
+        query: getCollectionProductsQuery,
+        tags: [TAGS.collections, TAGS.products],
+        cache: "force-cache",
+        variables: {
+            handle: collection,
+            // reverse,
+            // sortKey: sortKey === "CREATED_AT" ? "CREATED" : sortKey,
+        },
+    });
+
+
+    if (!res.body.data.collection) {
+        return [];
+    }
+
+    return reshapeProducts(
+        removeEdgesAndNodes(res.body.data.collection.products)
+    );
+}
+
 
 
 function reshapeCart(cart: ShopifyCart): Cart {

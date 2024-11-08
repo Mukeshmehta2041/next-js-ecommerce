@@ -9,7 +9,7 @@ export const SearchBar = () => {
     }
     return (
         <form
-            className="flex items-center justify-between gap-4 bg-gray-100 p-2 rounded-md flex-1"
+            className="flex items-center justify-between gap-4 bg-[#FBF8F5] p-2 rounded-md flex-1 border-[#1F2020] border"
             onSubmit={handleSearch}
         >
             <input
