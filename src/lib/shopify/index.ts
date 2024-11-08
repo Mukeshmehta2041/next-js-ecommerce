@@ -267,16 +267,15 @@ export async function getCollectionProducts({
     const res = await shopifyFetch<ShopifyCollectionProductsOperation>({
         query: getCollectionProductsQuery,
         tags: [TAGS.collections, TAGS.products],
-        cache: "force-cache",
         variables: {
             handle: collection,
-            // reverse,
-            // sortKey: sortKey === "CREATED_AT" ? "CREATED" : sortKey,
+            reverse,
+            sortKey: sortKey === "CREATED_AT" ? "CREATED" : sortKey,
         },
     });
 
-
     if (!res.body.data.collection) {
+        console.log(`No collection found for \`${collection}\``);
         return [];
     }
 
@@ -284,8 +283,6 @@ export async function getCollectionProducts({
         removeEdgesAndNodes(res.body.data.collection.products)
     );
 }
-
-
 
 function reshapeCart(cart: ShopifyCart): Cart {
     if (!cart.cost?.totalTaxAmount) {

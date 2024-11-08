@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { createCustomer } from "@/lib/shopify"
-import { TriangleAlert } from "lucide-react"
+import { TriangleAlert, Loader2 } from "lucide-react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
 import { useState } from "react"
@@ -23,32 +23,37 @@ export const SignUpCard = () => {
     const [password, setPassword] = useState("")
     const [error, setError] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
 
     const onCredentialsSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setIsLoading(true)
+        setError(false)
 
         try {
             const customer = await createCustomer(firstName, lastName, email, password)
+            console.log("customer", customer);
+
             if (customer) {
                 signIn("credentials", {
                     email: email,
                     password: password,
-                    callbackUrl: "/"
+                    callbackUrl: "/",
                 })
             }
         } catch (error: any) {
             console.error("Sign up error:", error)
             setError(true)
             setErrorMessage(error?.message || "An error occurred during sign up.")
+        } finally {
+            setIsLoading(false)
         }
     }
 
     return (
         <Card className="w-full h-full p-8">
             <CardHeader className="px-0 pt-0">
-                <CardTitle>
-                    Create an account
-                </CardTitle>
+                <CardTitle>Create an account</CardTitle>
                 <CardDescription>
                     Use your email or another service to continue
                 </CardDescription>
@@ -60,7 +65,7 @@ export const SignUpCard = () => {
                 </div>
             )}
             <CardContent className="space-y-5 px-0 pb-0">
-                <form action="" onSubmit={onCredentialsSignUp} className="space-y-2.5">
+                <form onSubmit={onCredentialsSignUp} className="space-y-2.5">
                     <Input
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
@@ -91,12 +96,29 @@ export const SignUpCard = () => {
                         minLength={3}
                         maxLength={20}
                     />
-                    <Button type="submit" className="w-full" size="lg">Continue</Button>
+                    <Button
+                        type="submit"
+                        variant="sandstone"
+                        className="w-full"
+                        size="lg"
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Loading...
+                            </>
+                        ) : (
+                            "Continue"
+                        )}
+                    </Button>
                 </form>
                 <Separator />
-
                 <p className="text-xs text-muted-foreground">
-                    Already have an account? <Link href="/sign-in"><span className="text-sky-700 hover:underline">Sign in</span></Link>
+                    Already have an account?{" "}
+                    <Link href="/sign-in">
+                        <span className="text-sky-700 hover:underline">Sign in</span>
+                    </Link>
                 </p>
             </CardContent>
         </Card>

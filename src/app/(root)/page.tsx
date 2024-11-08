@@ -1,6 +1,6 @@
 import { BannerSlider } from '@/components/collection/banner-slider'
 import { CollectionCarousel } from '@/components/collection/collection-list'
-import NewArrivals from '@/components/new-arrivals'
+import { NewArrivals } from '@/components/new-arrivals'
 import { FeaturedProductList } from '@/components/product/featured-product-list'
 import { getProducts } from '@/lib/shopify'
 import React from 'react'

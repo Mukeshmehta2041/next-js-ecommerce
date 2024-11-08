@@ -34,12 +34,7 @@ export default async function CollectionPage({ params: { handle }, searchParams 
             <div className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-3xl font-bold">{handle.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}</h1>
-                    <SortSelect
-                        currentSort={sort || defaultSort?.slug!}
-                    // onSortChange={(newSort) => {
-                    //     console.log('Sort changed to:', newSort)
-                    // }}
-                    />
+                    <SortSelect />
                 </div>
                 <Suspense
                     fallback={

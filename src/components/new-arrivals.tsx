@@ -1,29 +1,28 @@
 import Link from 'next/link';
 import React from 'react';
 
-export default function NewArrivals() {
-    // Collection data to simplify repeated elements
+export const NewArrivals = () => {
     const collections = [
         {
-            href: '/search/womens-collection',
+            href: '/collections/womens-collection',
             src: '/womens-collection.png',
             alt: "Women's Collection",
             title: "Women’s Collection",
         },
         {
-            href: '/search/mens-collection',
+            href: '/collections/mens-collection',
             src: '/mens-collection.png',
             alt: "Men's Collection",
             title: "Men’s Collection",
         },
         {
-            href: '/search/kids',
+            href: '/collections/kids',
             src: '/kids-collection.png',
             alt: "Kids' Collection",
             title: "Kids’ Collection",
         },
         {
-            href: '/search/sales',
+            href: '/collections/sales',
             src: '/sales-collection.png',
             alt: "Sale's Collection",
             title: "Sale’s Collection",
