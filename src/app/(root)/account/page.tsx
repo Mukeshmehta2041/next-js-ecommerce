@@ -10,7 +10,7 @@ const AccountPage = async () => {
     const session = await auth()
 
     if (!session) {
-        redirect("/sign-in")
+        redirect("/account/login")
     }
 
     return (

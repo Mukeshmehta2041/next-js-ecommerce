@@ -20,7 +20,7 @@ export const NavIcons = ({ session }: Props) => {
         if (session) {
             return router.push("/account")
         } else {
-            router.push("/sign-in")
+            router.push("/account/login")
         }
     }
 

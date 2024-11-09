@@ -85,8 +85,8 @@ export default {
         }),
     ],
     pages: {
-        signIn: "/sign-in",
-        error: "/sign-in",
+        signIn: "/account/login",
+        error: "/account/login",
     },
     session: {
         strategy: "jwt",
